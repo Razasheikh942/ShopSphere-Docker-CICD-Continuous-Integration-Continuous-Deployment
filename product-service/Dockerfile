@@ -1,17 +1,23 @@
-FROM eclipse-temurin:17-jdk-alpine as builder
-WORKDIR /app
-COPY mvnw .
-COPY .mvn .mvn
-COPY pom.xml .
-COPY src src
-RUN ./mvnw install -DskipTests
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
+# ---------- STAGE 1: Build ----------
+FROM maven:3.9-eclipse-temurin-17 AS build
 
+WORKDIR /app
+
+# Pura multi-module project copy karo (root pom sab modules verify karta hai)
+COPY . .
+
+# Sirf product-service build karo, common ko bhi automatically build karega (-am)
+RUN mvn -pl product-service -am clean package -DskipTests -B
+
+
+# ---------- STAGE 2: Run ----------
 FROM eclipse-temurin:17-jre-alpine
-VOLUME /tmp
-ARG DEPENDENCY=/app/target/dependency
-COPY --from=builder ${DEPENDENCY}/BOOT-INF/lib /app/lib
-COPY --from=builder ${DEPENDENCY}/META-INF /app/META-INF
-COPY --from=builder ${DEPENDENCY}/BOOT-INF/classes /app
-COPY --from=builder /app/target/*.jar app.jar
-ENTRYPOINT ["java","-cp","app:app/lib/*","com.shopsphere.product.ProductServiceApplication"] 
+
+WORKDIR /app
+
+COPY --from=build /app/product-service/target/*.jar app.jar
+
+EXPOSE 8081
+
+ENTRYPOINT ["java", "-jar", "app.jar"]
+

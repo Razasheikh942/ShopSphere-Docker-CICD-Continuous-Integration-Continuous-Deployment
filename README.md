@@ -1,200 +1,179 @@
-# ShopSphere — E-commerce Microservice Platform
+# 🛒 ShopSphere — E-Commerce Microservices Platform
 
-A production-grade e-commerce platform built with microservices architecture using Spring Boot, MongoDB, and a React frontend.
+> **Note:** This project's microservices architecture and business logic was pre-built. My contribution focuses entirely on the **DevOps & Containerization** layer — Dockerizing all services and orchestrating them with Docker Compose.
 
-## System Architecture
+---
 
-<p align="center">
-  <img src="docs/architecture.svg" alt="ShopSphere System Architecture" width="100%"/>
-</p>
+## 🚀 What I Did (DevOps Contribution)
 
-The platform follows a **microservices architecture** where each service is independently deployable and owns its domain logic. All client requests flow through the API Gateway, which handles JWT authentication and routes to the appropriate service.
+- ✅ Wrote **10 Dockerfiles** (9 Spring Boot services + React frontend) using multi-stage builds
+- ✅ Solved **multi-module Maven** build challenge (root `pom.xml` context issue)
+- ✅ Configured **Docker Compose** to orchestrate all services with MongoDB & Redis
+- ✅ Set up **named volumes** for data persistence (MongoDB + Redis)
+- ✅ Used **environment variables** for service discovery (`MONGODB_HOST`, `REDIS_HOST`)
+- ✅ Optimized build context with `.dockerignore` (reduced from 451MB → 28KB)
+- ✅ Implemented **multi-stage builds** to minimize final image size (~150MB vs 500MB+)
 
-### Services Overview
+---
+
+## 🏗️ Architecture
+
+```
+                        ┌─────────────────┐
+                        │   React Frontend │
+                        │   (Nginx :3000)  │
+                        └────────┬────────┘
+                                 │
+                        ┌────────▼────────┐
+                        │   API Gateway   │
+                        │    (:8080)      │
+                        └────────┬────────┘
+                                 │
+         ┌───────────────────────┼───────────────────────┐
+         │                       │                       │
+┌────────▼───────┐    ┌──────────▼───────┐   ┌──────────▼───────┐
+│  User Service  │    │ Product Service  │   │  Order Service   │
+│    (:8083)     │    │    (:8081)       │   │    (:8082)       │
+└────────┬───────┘    └──────────┬───────┘   └──────────┬───────┘
+         │                       │                       │
+         └───────────────────────┼───────────────────────┘
+                                 │
+                    ┌────────────┼────────────┐
+                    │                         │
+           ┌────────▼────────┐      ┌─────────▼───────┐
+           │    MongoDB      │      │      Redis       │
+           │   (:27017)      │      │     (:6379)      │
+           └─────────────────┘      └─────────────────┘
+```
+
+---
+
+## 🛠️ Tech Stack
+
+### Application (Pre-built)
+| Layer | Technology |
+|---|---|
+| Backend | Java 17 + Spring Boot 3.2 |
+| Frontend | React 18 + TypeScript + Vite |
+| Database | MongoDB 7 |
+| Cache | Redis 7 |
+| API Gateway | Spring Cloud Gateway |
+
+### DevOps (My Work)
+| Tool | Usage |
+|---|---|
+| Docker | Containerization |
+| Docker Compose | Multi-service orchestration |
+| Multi-stage Build | Optimized image size |
+| Named Volumes | Data persistence |
+| .dockerignore | Build optimization |
+
+---
+
+## 📦 Services & Ports
 
 | Service | Port | Description |
-|---------|------|-------------|
-| **API Gateway** | 8080 | Routes requests, JWT authentication filter, rate limiting |
-| **User Service** | 8083 | User registration, login, profile management, JWT token generation |
-| **Product Service** | 8081 | Product catalog, inventory management, search, categories |
-| **Order Service** | 8082 | Order creation, status tracking, order history |
-| **Cart Service** | 8084 | Shopping cart CRUD, coupon application |
-| **Payment Service** | 8085 | Payment processing, transaction records |
-| **Shipping Service** | 8086 | Shipment creation, delivery tracking, status updates |
-| **Notification Service** | 8087 | In-app notifications and alerts |
-| **Review Service** | 8088 | Product reviews, ratings, moderation |
-| **React Frontend** | 3000 | Customer storefront and admin dashboard |
+|---|---|---|
+| API Gateway | 8080 | Routes requests, JWT auth |
+| User Service | 8083 | Registration, login, JWT |
+| Product Service | 8081 | Catalog, inventory, search |
+| Order Service | 8082 | Orders, tracking, history |
+| Cart Service | 8084 | Shopping cart, coupons |
+| Payment Service | 8085 | Payment processing |
+| Shipping Service | 8086 | Shipment, delivery tracking |
+| Notification Service | 8087 | In-app notifications |
+| Review Service | 8088 | Reviews, ratings |
+| React Frontend | 3000 | Customer storefront |
 
-## Technology Stack
+---
 
-### Backend
-- **Framework**: Spring Boot 3.2.3 (Java 17)
-- **API Gateway**: Spring Cloud Gateway
-- **Inter-Service Communication**: Spring Cloud OpenFeign
-- **Database**: MongoDB
-- **Caching**: Redis
-- **Authentication**: JWT (JSON Web Tokens)
-- **Build Tool**: Maven
-- **Mapping**: MapStruct
-- **API Docs**: OpenAPI / Swagger
+## ⚡ Run Locally (One Command)
 
-### Frontend
-- **Framework**: React 18 + TypeScript
-- **Build Tool**: Vite
-- **Styling**: Tailwind CSS
-- **State Management**: Redux Toolkit (RTK Query)
-- **Routing**: React Router v6
-- **Icons**: Lucide React
+### Prerequisites
+- Docker Desktop installed and running
+- 15GB+ free disk space
 
-## Prerequisites
-
-- JDK 17
-- Maven
-- Node.js 18+
-- MongoDB
-- Redis
-
-## Getting Started
-
-### 1. Start Infrastructure
-
+### Start Everything
 ```bash
-# MongoDB
-mongod --config /opt/homebrew/etc/mongod.conf  # macOS Apple Silicon
-# or
-mongod --config /usr/local/etc/mongod.conf     # macOS Intel
-
-# Redis
-redis-server
+git clone https://github.com/YOUR_USERNAME/ShopSphere.git
+cd ShopSphere
+docker compose up --build
 ```
 
-### 2. Start Backend Services
+That's it. Docker will:
+1. Build all 10 images automatically
+2. Start MongoDB + Redis
+3. Start all 9 microservices
+4. Start React frontend
 
-Start each service from the project root in separate terminals:
+### Access
+- Frontend: http://localhost:3000
+- API Gateway: http://localhost:8080
 
+### Stop Everything
 ```bash
-# API Gateway
-cd api-gateway && mvn spring-boot:run
-
-# User Service
-cd user-service && mvn spring-boot:run
-
-# Product Service
-cd product-service && mvn spring-boot:run
-
-# Order Service
-cd order-service && mvn spring-boot:run
-
-# Cart Service
-cd cart-service && mvn spring-boot:run
-
-# Payment Service
-cd payment-service && mvn spring-boot:run
-
-# Shipping Service
-cd shipping-service && mvn spring-boot:run
-
-# Notification Service
-cd notification-service && mvn spring-boot:run
-
-# Review Service
-cd review-service && mvn spring-boot:run
+docker compose down
 ```
 
-### 3. Start Frontend
-
+### Stop + Delete All Data (volumes)
 ```bash
-cd frontend
-npm install
-npm run dev
+docker compose down -v
 ```
 
-### 4. Access the Application
+---
 
-- **Storefront**: http://localhost:3000
-- **API Gateway**: http://localhost:8080
+## 🔑 Key DevOps Challenges Solved
 
-## Project Structure
+### 1. Multi-module Maven Build
+**Problem:** Root `pom.xml` declares all 9 modules. Docker couldn't find sibling modules when building from a service subfolder.
 
+**Solution:** Used root as build context (`docker build -f service/Dockerfile .`) with `COPY . .` so Maven can resolve all module dependencies.
+
+### 2. Service Discovery via Environment Variables
+**Problem:** All services had `localhost:27017` hardcoded for MongoDB — this breaks in Docker (containers can't reach each other via localhost).
+
+**Solution:** Config already used `${MONGODB_HOST:localhost}` pattern. Simply passed `MONGODB_HOST=mongodb` in Compose, where `mongodb` is the container service name resolved by Docker's internal DNS.
+
+### 3. Build Context Optimization
+**Problem:** Initial build transferred 451MB context to Docker daemon (slow builds).
+
+**Solution:** Added `.dockerignore` excluding `**/target`, `.git`, `node_modules` etc. — reduced to 28KB (16x improvement).
+
+---
+
+## 📁 Project Structure
 ```
-ShopSphere-E-commerce-Microservice-Platform/
-├── api-gateway/          # Spring Cloud Gateway + JWT filter
-├── user-service/         # Authentication & user management
-├── product-service/      # Product catalog & inventory
-├── order-service/        # Order processing
-├── cart-service/         # Shopping cart
-├── payment-service/      # Payment processing
-├── shipping-service/     # Shipment & delivery tracking
-├── notification-service/ # In-app notifications
-├── review-service/       # Reviews & ratings
-├── frontend/             # React + Vite + TypeScript
-│   └── src/
-│       ├── features/     # RTK Query API slices per service
-│       ├── pages/
-│       │   ├── store/    # Customer-facing pages
-│       │   ├── admin/    # Admin dashboard pages
-│       │   └── auth/     # Login & registration
-│       ├── components/   # Shared UI components
-│       └── routes/       # Route definitions & guards
-└── docs/                 # Architecture diagrams
+ShopSphere/
+├── docker-compose.yml          ← orchestrates everything
+├── .dockerignore               ← build optimization
+├── common/                     ← shared library (no Dockerfile)
+├── api-gateway/
+│   └── Dockerfile
+├── user-service/
+│   └── Dockerfile
+├── product-service/
+│   └── Dockerfile
+├── order-service/
+│   └── Dockerfile
+├── cart-service/
+│   └── Dockerfile
+├── payment-service/
+│   └── Dockerfile
+├── shipping-service/
+│   └── Dockerfile
+├── notification-service/
+│   └── Dockerfile
+├── review-service/
+│   └── Dockerfile
+└── frontend/
+    └── Dockerfile
 ```
 
-## Key Features
+---
 
-### Customer Storefront
-- Browse product catalog with search and filters
-- Product detail pages with images, specs, and reviews
-- Shopping cart with quantity management
-- Multi-step checkout (shipping → payment → confirmation)
-- Order history and tracking
-- Write and read product reviews
-- In-app notifications
-
-### Admin Dashboard
-- Dashboard with order statistics
-- Product CRUD management
-- Order management and status updates
-- User management
-- Review moderation (approve/reject)
-- Shipment tracking
-
-## Architecture Decisions
-
-1. **Single API Gateway** — All client requests route through Spring Cloud Gateway which handles JWT validation and request routing
-2. **Service-per-Domain** — Each microservice owns its domain (users, products, orders, etc.) with its own dedicated database
-3. **Database-per-Service** — Each service has its own MongoDB database (`shopsphere_users`, `shopsphere_products`, `shopsphere_orders`, etc.) running on a shared MongoDB instance for true data isolation
-4. **JWT Authentication** — Stateless auth with tokens generated by User Service and validated at the Gateway
-5. **OpenFeign for Inter-Service Communication** — Services communicate via declarative Feign clients (e.g., Order Service calls Product Service and Notification Service)
-6. **RTK Query** — Single Redux API slice with injected endpoints per feature for efficient caching and cache invalidation
-7. **Vite Proxy** — Frontend proxies `/api` requests to the gateway during development to avoid CORS issues
-
-## Inter-Service Communication
-
-Services communicate with each other using **Spring Cloud OpenFeign** declarative REST clients. This avoids boilerplate HTTP code and provides built-in load balancing support.
-
-| Calling Service | Target Service | Feign Client | Purpose |
-|-----------------|---------------|--------------|---------|
-| Order Service | Product Service | `ProductServiceClient` | Fetch product details, update stock after order |
-| Order Service | Notification Service | `NotificationServiceClient` | Send order confirmation notifications |
-
-All Feign calls are wrapped in try-catch blocks for graceful degradation — if a downstream service is unavailable, the primary operation (e.g., order creation) still succeeds.
-
-## API Endpoints
-
-All endpoints are prefixed with `/api/v1` and accessed through the gateway at port 8080.
-
-| Prefix | Service |
-|--------|---------|
-| `/api/v1/auth/**` | User Service (login, register) |
-| `/api/v1/users/**` | User Service (profiles) |
-| `/api/v1/products/**` | Product Service |
-| `/api/v1/orders/**` | Order Service |
-| `/api/v1/carts/**` | Cart Service |
-| `/api/v1/payments/**` | Payment Service |
-| `/api/v1/shipments/**` | Shipping Service |
-| `/api/v1/notifications/**` | Notification Service |
-| `/api/v1/reviews/**` | Review Service |
-
-## License
-
-This project is licensed under the MIT License.
+## 🔮 Next Steps (Roadmap)
+- [ ] CI/CD Pipeline with GitHub Actions
+- [ ] Deploy to AWS EC2
+- [ ] Infrastructure as Code with Terraform
+- [ ] Kubernetes orchestration (K8s)
+- [ ] Monitoring with Prometheus + Grafana
