@@ -18,6 +18,8 @@ jobs:
        java-version: 17
        distribution: temurin 
        cache: maven 
+   - name: build common module
+     run: cd common && mvn clean install -DskipTests
    - name: build api-gateway
      run: cd api-gateway && mvn clean package -DskipTests
    - name: build cart-service
