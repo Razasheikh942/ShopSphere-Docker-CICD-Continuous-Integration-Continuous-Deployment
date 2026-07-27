@@ -1,6 +1,6 @@
 # 🛒 ShopSphere — E-Commerce Microservices Platform
 
-> **Note:** This project's microservices architecture and business logic was pre-built. My contribution focuses entirely on the **DevOps & Containerization** layer — Dockerizing all services and orchestrating them with Docker Compose.
+> **Note:** This project's microservices architecture and business logic was pre-built. My contribution focuses entirely on the **DevOps & Containerization** layer — Dockerizing all services, orchestrating them with Docker Compose, and automating the pipeline with GitHub Actions.
 
 ---
 
@@ -13,6 +13,7 @@
 - ✅ Used **environment variables** for service discovery (`MONGODB_HOST`, `REDIS_HOST`)
 - ✅ Optimized build context with `.dockerignore` (reduced from 451MB → 28KB)
 - ✅ Implemented **multi-stage builds** to minimize final image size (~150MB vs 500MB+)
+- ✅ Built **CI/CD pipeline** with GitHub Actions — auto build, test, and push all 9 service images to Docker Hub on every `main` branch push
 
 ---
 
@@ -20,8 +21,8 @@
 
 ```
                         ┌─────────────────┐
-                        │   React Frontend │
-                        │   (Nginx :3000)  │
+                        │  React Frontend  │
+                        │  (Nginx :3000)   │
                         └────────┬────────┘
                                  │
                         ┌────────▼────────┐
@@ -48,6 +49,42 @@
 
 ---
 
+## 🔄 CI/CD Pipeline
+
+Every push to `main` branch triggers this automated pipeline:
+
+```
+git push origin main
+        │
+        ▼
+┌───────────────────┐
+│  GitHub Actions   │
+│  automatically:   │
+│                   │
+│  1. Checkout code │
+│  2. Setup Java 17 │
+│  3. Build + Test  │
+│     all services  │
+│  4. Build Docker  │
+│     images        │
+│  5. Push to       │
+│     Docker Hub    │
+└───────────────────┘
+        │
+        ▼
+   ✅ All 9 images
+   live on Docker Hub
+```
+
+### Pipeline Jobs
+
+| Job | What it does |
+|---|---|
+| `build` | Compiles all 9 Spring Boot services with Maven |
+| `docker-push` | Builds Docker images and pushes to Docker Hub (runs only if build passes) |
+
+---
+
 ## 🛠️ Tech Stack
 
 ### Application (Pre-built)
@@ -67,6 +104,8 @@
 | Multi-stage Build | Optimized image size |
 | Named Volumes | Data persistence |
 | .dockerignore | Build optimization |
+| GitHub Actions | CI/CD pipeline automation |
+| Docker Hub | Container image registry |
 
 ---
 
@@ -95,8 +134,8 @@
 
 ### Start Everything
 ```bash
-git clone https://github.com/YOUR_USERNAME/ShopSphere.git
-cd ShopSphere
+git clone https://github.com/Razasheikh942/ShopSphere-Docker-CICD.git
+cd ShopSphere-Docker-CICD
 docker compose up --build
 ```
 
@@ -139,11 +178,19 @@ docker compose down -v
 
 **Solution:** Added `.dockerignore` excluding `**/target`, `.git`, `node_modules` etc. — reduced to 28KB (16x improvement).
 
+### 4. CI/CD Pipeline with Dependency Control
+**Problem:** Docker images should not be pushed if any service fails to build/compile.
+
+**Solution:** Used `needs: build` in GitHub Actions — `docker-push` job only runs after `build` job passes successfully. Prevents broken images from reaching Docker Hub.
+
 ---
 
 ## 📁 Project Structure
 ```
-ShopSphere/
+ShopSphere-Docker-CICD/
+├── .github/
+│   └── workflows/
+│       └── ci-cd.yml           ← GitHub Actions pipeline
 ├── docker-compose.yml          ← orchestrates everything
 ├── .dockerignore               ← build optimization
 ├── common/                     ← shared library (no Dockerfile)
@@ -172,7 +219,8 @@ ShopSphere/
 ---
 
 ## 🔮 Next Steps (Roadmap)
-- [ ] CI/CD Pipeline with GitHub Actions
+- [x] Containerization with Docker & Docker Compose
+- [x] CI/CD Pipeline with GitHub Actions
 - [ ] Deploy to AWS EC2
 - [ ] Infrastructure as Code with Terraform
 - [ ] Kubernetes orchestration (K8s)
