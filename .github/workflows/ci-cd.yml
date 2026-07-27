@@ -1,0 +1,113 @@
+name: CICD pipeline for shopshere
+on:
+ push:
+  branches:
+    - main 
+ pull_request:
+  branches:
+   - main 
+jobs:
+ build:
+  runs-on: ubuntu-latest
+  steps:
+   - name: code checkout
+     uses: actions/checkout@v4
+   - name: setup java
+     uses: actions/setup-java@v4
+     with:
+       java-version: 17
+       distribution: temurin 
+       cache: maven 
+   - name: build api-gateway
+     run: cd api-gateway && mvn clean package -DskipTests
+   - name: build cart-service
+     run:  cd cart-service && mvn clean package -DskipTests
+   - name: build notification-service
+     run:  cd notification-service && mvn clean package -DskipTests
+   - name: build order-service
+     run:  cd order-service && mvn clean package -DskipTests
+
+   - name: build payment-service
+     run:  cd payment-service && mvn clean package -DskipTests
+   - name: build product-service
+     run:  cd product-service && mvn clean package -DskipTests
+   - name: build review-service
+     run:  cd review-service && mvn clean package -DskipTests
+   - name: build shipping-service
+     run:  cd shipping-service && mvn clean package -DskipTests
+   - name: build user-service
+     run:  cd user-service && mvn clean package -DskipTests
+ docker-push:
+ 
+   runs-on: ubuntu-latest
+   needs: build
+   steps:
+    - name: code checkout
+      uses: actions/checkout@v4
+    - name: docker login
+      uses: docker/login-action@v3
+      with:
+       username: ${{secrets.DOCKER_USERNAME}}
+       password: ${{secrets.DOCKER_PASSWORD}}
+    - name: build and push user-service
+      uses: docker/build-push-action@v5
+      with:
+       context: ./user-service
+       push: true
+       tags: ${{secrets.DOCKER_USERNAME}}/shopsphere-user-service:latest
+
+    - name: build and push api-gateway
+      uses: docker/build-push-action@v5
+      with:
+       context: ./api-gateway
+       push: true
+       tags: ${{secrets.DOCKER_USERNAME}}/shopsphere-api-gateway:latest
+
+    - name: build and push cart-service
+      uses: docker/build-push-action@v5
+      with:
+       context: ./cart-service
+       push: true
+       tags: ${{secrets.DOCKER_USERNAME}}/shopsphere-cart-service:latest
+
+    - name: build and push notification-service
+      uses: docker/build-push-action@v5
+      with:
+       context: ./notification-service
+       push: true
+       tags: ${{secrets.DOCKER_USERNAME}}/shopsphere-notification-service:latest
+
+    - name: build and push order-service
+      uses: docker/build-push-action@v5
+      with:
+       context: ./order-service
+       push: true
+       tags: ${{secrets.DOCKER_USERNAME}}/shopsphere-order-service:latest
+
+    - name: build and push payment-service
+      uses: docker/build-push-action@v5
+      with:
+       context: ./payment-service
+       push: true
+       tags: ${{secrets.DOCKER_USERNAME}}/shopsphere-payment-service:latest
+
+    - name: build and push product-service
+      uses: docker/build-push-action@v5
+      with:
+       context: ./product-service
+       push: true
+       tags: ${{secrets.DOCKER_USERNAME}}/shopsphere-product-service:latest
+
+    - name: build and push review-service
+      uses: docker/build-push-action@v5
+      with:
+       context: ./review-service
+       push: true
+       tags: ${{secrets.DOCKER_USERNAME}}/shopsphere-review-service:latest
+
+    - name: build and push shipping-service
+      uses: docker/build-push-action@v5
+      with:
+       context: ./shipping-service
+       push: true
+       tags: ${{secrets.DOCKER_USERNAME}}/shopsphere-shipping-service:latest
