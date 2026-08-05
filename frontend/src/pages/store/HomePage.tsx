@@ -12,11 +12,11 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+     <section className="bg-gradient-to-r from-red-600 to-red-800 text-white">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-              Discover Your Style
+              This is Our CICD Project
             </h1>
             <p className="mt-4 text-lg text-indigo-100">
               Shop the latest products with fast delivery and secure payments.
