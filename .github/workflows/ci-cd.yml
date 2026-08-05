@@ -140,3 +140,20 @@ jobs:
           file: ./user-service/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/shopsphere-user-service:latest
+
+  # CD Part
+  deploy:
+    runs-on: ubuntu-latest
+    needs: docker-push
+    steps:
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/ShopSphere-Docker-CICD-Continuous-Integration-Continuous-Deployment
+            git pull origin main
+            docker compose up -d --build
+            docker system prune -f
