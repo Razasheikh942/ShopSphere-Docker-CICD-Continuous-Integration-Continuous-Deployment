@@ -1,8 +1,6 @@
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
-COPY pom.xml .
-COPY common ./common
-COPY review-service ./review-service
+COPY . .
 RUN mvn clean install -N -DskipTests
 RUN mvn -pl common clean install -DskipTests
 RUN mvn -pl review-service clean package -DskipTests

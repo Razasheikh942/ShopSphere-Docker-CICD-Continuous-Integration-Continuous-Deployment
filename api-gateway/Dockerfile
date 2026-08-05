@@ -1,9 +1,6 @@
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 COPY . .
-COPY pom.xml .
-COPY common ./common
-COPY api-gateway ./api-gateway
 RUN mvn clean install -N -DskipTests
 RUN mvn -pl common clean install -DskipTests
 RUN mvn -pl api-gateway clean package -DskipTests
